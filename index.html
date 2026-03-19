@@ -3,92 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Tracker Smart Dash v3.0</title>
+    <title>Kawasaki D-Tracker Smart Dash v6.0</title>
     <style>
         :root {
-            --neon-blue: #00f3ff;
-            --neon-green: #39ff14;
-            --danger-red: #ff3131;
-            --bg-black: #050505;
+            --neon-blue: #00f3ff; --neon-green: #39ff14; --danger-red: #ff3131; --orange: #ff8c00; --bg-black: #050505;
         }
-
-        body {
-            background-color: var(--bg-black);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
+        body { background-color: var(--bg-black); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        
+        /* Opening Animation Styles */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; transition: opacity 1s ease-out;
         }
+        .kawasaki-logo { font-size: 50px; font-weight: 900; color: var(--neon-green); letter-spacing: 5px; transform: scale(0.5); animation: zoomIn 1.5s forwards; }
+        @keyframes zoomIn { to { transform: scale(1.2); } }
 
-        .dashboard {
-            width: 90vw;
-            max-width: 800px;
-            background: linear-gradient(145deg, #111, #000);
-            border: 2px solid #222;
-            border-radius: 30px;
-            padding: 20px;
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.1);
-        }
-
-        /* Top Bar */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px 15px;
-            border-bottom: 1px solid #222;
-        }
-
-        .bt-btn {
-            background: #222;
-            color: var(--neon-blue);
-            border: 1px solid var(--neon-blue);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .indicators { display: flex; gap: 25px; font-size: 24px; }
+        .dashboard { width: 95vw; max-width: 800px; background: #000; border: 2px solid #222; border-radius: 30px; padding: 20px; box-shadow: 0 0 40px rgba(0, 243, 255, 0.1); opacity: 0; transition: opacity 1s; }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #222; }
+        .bt-btn { background: #111; color: var(--neon-blue); border: 1px solid var(--neon-blue); padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        
+        .indicators { display: flex; gap: 15px; font-size: 22px; }
         .ind { opacity: 0.1; transition: 0.3s; }
         .active-g { color: var(--neon-green); opacity: 1; text-shadow: 0 0 10px var(--neon-green); }
         .active-b { color: var(--neon-blue); opacity: 1; text-shadow: 0 0 10px var(--neon-blue); }
-
-        /* Main Stats */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .speed-val { font-size: 110px; font-weight: 900; line-height: 1; text-align: center; }
+        .active-r { color: var(--danger-red); opacity: 1; text-shadow: 0 0 10px var(--danger-red); }
+        
+        .main-content { display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; margin-top: 20px; }
+        .speed-val { font-size: 110px; font-weight: 900; text-align: center; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
         .unit { font-size: 18px; color: #555; text-align: center; }
-
-        .stat-box { background: #111; padding: 15px; border-radius: 15px; text-align: center; margin: 5px; }
-        .stat-label { font-size: 12px; color: #666; }
+        
+        .stat-box { background: #111; padding: 12px; border-radius: 15px; text-align: center; border: 1px solid #222; }
+        .stat-label { font-size: 11px; color: #666; margin-bottom: 5px; text-transform: uppercase; }
         .stat-val { font-size: 22px; font-weight: bold; color: var(--neon-blue); }
 
-        /* RPM Bar */
-        .rpm-section { grid-column: 1 / span 3; margin-top: 25px; }
-        .rpm-bg { width: 100%; height: 20px; background: #111; border-radius: 10px; overflow: hidden; }
-        .rpm-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-green), yellow, red); transition: 0.1s; }
-        
+        .trip-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .trip-box { background: #0a0a0a; padding: 10px; border-radius: 12px; border: 1px dashed #333; position: relative; text-align: center; }
+        .reset-btn { position: absolute; top: 5px; right: 5px; background: #222; border: none; color: #777; font-size: 10px; padding: 5px; border-radius: 5px; cursor: pointer; }
+
+        .rpm-section { margin-top: 25px; }
+        .rpm-bg { width: 100%; height: 20px; background: #111; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        .rpm-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--neon-green), yellow, var(--danger-red)); transition: width 0.1s linear; }
         .odo { text-align: center; font-size: 14px; color: #444; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
+<div id="splash-screen">
+    <div class="kawasaki-logo">KAWASAKI</div>
+    <div style="color: #444; margin-top: 20px; font-size: 12px;">SMART DASH SYSTEM BOOTING...</div>
+</div>
+
+<div class="dashboard" id="main-dash">
     <div class="top-bar">
-        <button class="bt-btn" onclick="connectBLE()">CONNECT BIKE</button>
+        <button id="bt-status" class="bt-btn" onclick="connectBLE()">CONNECT BIKE</button>
         <div class="indicators">
             <span id="left-ind" class="ind">⬅️</span>
             <span id="neutral-ind" class="ind">N</span>
+            <span id="stand-ind" class="ind">⚠️ STAND</span>
             <span id="high-ind" class="ind">🔆</span>
             <span id="right-ind" class="ind">➡️</span>
         </div>
@@ -96,7 +68,7 @@
 
     <div class="main-content">
         <div class="stat-box">
-            <div class="stat-label">TEMP</div>
+            <div class="stat-label">Coolant Temp</div>
             <div id="temp" class="stat-val">0.0°C</div>
         </div>
         <div class="speed-section">
@@ -104,62 +76,141 @@
             <div class="unit">KM/H</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">BATTERY</div>
+            <div class="stat-label">Battery</div>
             <div id="volt" class="stat-val">0.0V</div>
+        </div>
+    </div>
+
+    <div class="trip-section">
+        <div class="trip-box">
+            <div class="stat-label">TRIP A</div>
+            <div id="trip-a" class="stat-val">0.0</div>
+            <button class="reset-btn" onclick="resetTrip('A')">RESET</button>
+        </div>
+        <div class="trip-box">
+            <div class="stat-label">TRIP B</div>
+            <div id="trip-b" class="stat-val">0.0</div>
+            <button class="reset-btn" onclick="resetTrip('B')">RESET</button>
         </div>
     </div>
 
     <div class="rpm-section">
         <div class="rpm-bg"><div id="rpm-bar" class="rpm-fill"></div></div>
-        <div class="odo">ODOMETER: <span id="odo-val">0.0</span> KM</div>
+        <div class="odo">TOTAL ODO: <span id="odo-val">0.0</span> KM</div>
     </div>
 </div>
 
 <script>
+    let bleDevice;
     let bleCharacteristic;
     const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
     const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
 
+    let tripA = parseFloat(localStorage.getItem('tripA')) || 0;
+    let tripB = parseFloat(localStorage.getItem('tripB')) || 0;
+    let lastOdo = null;
+
+    // --- 1. Opening Animation & RPM Sweep ---
+    window.onload = function() {
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('main-dash').style.opacity = '1';
+                startRpmSweep();
+            }, 1000);
+        }, 2500);
+    };
+
+    function startRpmSweep() {
+        let rpmBar = document.getElementById('rpm-bar');
+        rpmBar.style.transition = "width 1.5s ease-in-out";
+        rpmBar.style.width = "100%"; // Sweep Up
+        setTimeout(() => {
+            rpmBar.style.width = "0%"; // Sweep Down
+            setTimeout(() => { rpmBar.style.transition = "width 0.1s linear"; }, 1500);
+        }, 1600);
+    }
+
+    // --- 2. Bluetooth Logic (Auto-Connect Attempt) ---
     async function connectBLE() {
         try {
-            const device = await navigator.bluetooth.requestDevice({
+            bleDevice = await navigator.bluetooth.requestDevice({
                 filters: [{ name: 'D-Tracker_Smart_Dash' }],
                 optionalServices: [SERVICE_UUID]
             });
-            const server = await device.gatt.connect();
+            
+            bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
+            const server = await bleDevice.gatt.connect();
             const service = await server.getPrimaryService(SERVICE_UUID);
             bleCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-            
             await bleCharacteristic.startNotifications();
             bleCharacteristic.addEventListener('characteristicvaluechanged', handleData);
-            alert("Bike Connected! 🏍️");
-        } catch (error) {
-            console.log(error);
-            alert("Connection Failed!");
-        }
+            
+            document.getElementById('bt-status').innerText = "CONNECTED 🏍️";
+            document.getElementById('bt-status').style.color = "var(--neon-green)";
+        } catch (error) { console.log(error); }
+    }
+
+    function onDisconnected() {
+        document.getElementById('bt-status').innerText = "RECONNECTING...";
+        document.getElementById('bt-status').style.color = "var(--orange)";
+        setTimeout(() => {
+            if (bleDevice) bleDevice.gatt.connect().catch(e => console.log("Reconnect failed"));
+        }, 3000);
     }
 
     function handleData(event) {
         let value = new TextDecoder().decode(event.target.value);
         let data = value.split(','); 
-        // Format: RPM,SPEED,TEMP,VOLT,ODO,NEUT,BEAM,STAND,LEFT,RIGHT
 
         if(data.length >= 10) {
-            document.getElementById('speed').innerText = Math.round(data[1]);
-            document.getElementById('temp').innerText = data[2] + "°C";
-            document.getElementById('volt').innerText = data[3] + "V";
-            document.getElementById('odo-val').innerText = data[4];
+            let rpm = parseInt(data[0]);
+            let speed = Math.round(parseFloat(data[1]));
+            let temp = parseFloat(data[2]);
+            let volt = parseFloat(data[3]);
+            let odo = parseFloat(data[4]);
 
-            // RPM Bar (Max 12000 kiyala hithala)
-            let rpmWidth = (data[0] / 12000) * 100;
-            document.getElementById('rpm-bar').style.width = rpmWidth + "%";
+            // Trip Logic
+            if(lastOdo !== null && odo > lastOdo) {
+                let d = odo - lastOdo;
+                tripA += d; tripB += d;
+                localStorage.setItem('tripA', tripA.toFixed(2));
+                localStorage.setItem('tripB', tripB.toFixed(2));
+            }
+            lastOdo = odo;
+
+            // Update UI
+            document.getElementById('speed').innerText = speed;
+            document.getElementById('temp').innerText = temp.toFixed(1) + "°C";
+            document.getElementById('volt').innerText = volt.toFixed(1) + "V";
+            document.getElementById('odo-val').innerText = odo.toFixed(1);
+            document.getElementById('trip-a').innerText = tripA.toFixed(1);
+            document.getElementById('trip-b').innerText = tripB.toFixed(1);
+
+            // Temp Colors
+            let tEl = document.getElementById('temp');
+            if(temp <= 75) tEl.style.color = "var(--neon-blue)";
+            else if(temp <= 105) tEl.style.color = "var(--neon-green)";
+            else if(temp <= 115) tEl.style.color = "var(--orange)";
+            else tEl.style.color = "var(--danger-red)";
+
+            // RPM Update
+            document.getElementById('rpm-bar').style.width = Math.min((rpm / 12000) * 100, 100) + "%";
 
             // Indicators
             toggleInd('neutral-ind', data[5] == "1", 'active-g');
             toggleInd('high-ind', data[6] == "1", 'active-b');
+            toggleInd('stand-ind', data[7] == "1", 'active-r');
             toggleInd('left-ind', data[8] == "1", 'active-g');
             toggleInd('right-ind', data[9] == "1", 'active-g');
         }
+    }
+
+    function resetTrip(type) {
+        if(type === 'A') tripA = 0; else tripB = 0;
+        localStorage.setItem('trip' + type, 0);
+        document.getElementById('trip-' + type.toLowerCase()).innerText = "0.0";
     }
 
     function toggleInd(id, active, cls) {
@@ -167,6 +218,5 @@
         if(active) el.classList.add(cls); else el.classList.remove(cls);
     }
 </script>
-
 </body>
 </html>
