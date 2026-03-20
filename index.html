@@ -1,224 +1,101 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-<meta charset="UTF-8">
-<title>D-Tracker Smart Dash Pro</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-Tracker Pro Dash v15.2 (Dynamic RPM)</title>
+    <style>
+        :root {
+            --kawasaki-green: #32cd32; --danger-red: #ff3131; --bg-black: #000;
+        }
+        body { background-color: var(--bg-black); color: white; font-family: 'Orbitron', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        
+        .meter-container { 
+            position: relative; width: 850px; height: 480px; background: #000; border-radius: 40px; border: 2px solid #111; overflow: hidden; 
+        }
 
-  body {
-    margin: 0;
-    background: #000; /* Pure Black for AMOLED */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: 'Orbitron', sans-serif;
-    overflow: hidden;
-  }
+        /* Top Icons */
+        .top-row { position: absolute; top: 20px; width: 90%; left: 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .signal { font-size: 40px; color: #1a1a1a; transition: 0.2s; }
+        .signal-active { color: var(--kawasaki-green); text-shadow: 0 0 20px var(--kawasaki-green); }
+        .fan-icon { font-size: 12px; color: #1a1a1a; font-weight: bold; }
+        .fan-active { color: #00f3ff; text-shadow: 0 0 15px #00f3ff; }
 
-  .dashboard {
-    width: 90vw;
-    height: 50vh;
-    background: #000;
-    border: 2px solid #1a1a1a;
-    border-radius: 30px;
-    padding: 25px;
-    color: white;
-    position: relative;
-    box-shadow: 0 0 50px rgba(50, 205, 50, 0.1);
-  }
+        /* Dynamic RPM Segments */
+        .rpm-area { position: absolute; top: 60px; left: 30px; width: 750px; height: 250px; z-index: 5; }
+        .rpm-seg { fill: none; stroke: #151515; stroke-linecap: butt; transition: stroke 0.1s, filter 0.1s; }
 
-  /* Top Section */
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 10px;
-  }
+        /* Speedo & Gear */
+        .speed-ui { position: absolute; top: 140px; left: 35%; transform: translateX(-50%); text-align: center; z-index: 10; }
+        .speed-val { font-size: 180px; font-weight: 900; line-height: 0.8; letter-spacing: -8px; }
+        .speed-unit { font-size: 22px; color: #444; margin-top: 5px; display: block; }
 
-  .signal {
-    color: #32cd32;
-    font-size: 35px;
-    text-shadow: 0 0 15px #32cd32;
-    filter: drop-shadow(0 0 5px #32cd32);
-  }
+        .gear-ui { 
+            position: absolute; bottom: 100px; right: 80px; font-size: 80px; color: var(--kawasaki-green); font-weight: 900; 
+            border: 3px solid var(--kawasaki-green); padding: 5px 30px; border-radius: 20px; text-shadow: 0 0 25px var(--kawasaki-green);
+        }
 
-  .warning-area {
-    text-align: center;
-  }
+        /* Bottom Data */
+        .bottom-line { 
+            position: absolute; bottom: 30px; width: 85%; left: 7.5%; display: flex; justify-content: space-between; border-top: 1px solid #111; padding-top: 20px;
+        }
+        .stat-val { font-size: 26px; font-weight: bold; color: var(--kawasaki-green); display: block; }
+        .stat-lbl { font-size: 10px; color: #444; text-transform: uppercase; }
 
-  .side-stand {
-    color: #ffcc00;
-    font-size: 14px;
-    font-weight: bold;
-    letter-spacing: 2px;
-  }
-
-  .fan-on {
-    color: #00f3ff;
-    font-size: 12px;
-    margin-top: 5px;
-    display: none; /* පස්සේ JS එකෙන් ON කරන්න */
-    text-shadow: 0 0 10px #00f3ff;
-  }
-
-  /* Trip Meter */
-  .trip-container {
-    position: absolute;
-    top: 25px;
-    right: 80px;
-    text-align: right;
-  }
-  .trip-val { font-size: 18px; color: #fff; }
-  .trip-label { font-size: 9px; color: #666; display: block; }
-
-  /* RPM Curve with SVG */
-  .rpm-svg-container {
-    position: absolute;
-    left: 20px;
-    bottom: 80px;
-    width: 65%;
-  }
-
-  .rpm-path {
-    fill: none;
-    stroke: #333;
-    stroke-width: 8;
-    stroke-linecap: round;
-  }
-
-  .rpm-fill {
-    fill: none;
-    stroke: url(#rpmGradient);
-    stroke-width: 10;
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000; /* මේක JS එකෙන් වෙනස් කරන්න */
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.1s ease;
-  }
-
-  /* Speed & Gear */
-  .speed-container {
-    position: absolute;
-    right: 8%;
-    top: 35%;
-    text-align: center;
-  }
-
-  .speed-num {
-    font-size: 140px;
-    font-weight: 900;
-    line-height: 0.8;
-  }
-
-  .speed-unit {
-    font-size: 20px;
-    color: #444;
-    display: block;
-  }
-
-  .gear-box {
-    position: absolute;
-    right: 8%;
-    bottom: 25%;
-    border: 3px solid #32cd32;
-    padding: 5px 20px;
-    border-radius: 12px;
-    font-size: 45px;
-    color: #32cd32;
-    text-shadow: 0 0 20px #32cd32;
-    box-shadow: inset 0 0 15px rgba(50, 205, 50, 0.2);
-  }
-
-  /* Bottom Stats */
-  .bottom-stats {
-    position: absolute;
-    bottom: 20px;
-    width: 90%;
-    left: 5%;
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid #1a1a1a;
-    padding-top: 15px;
-  }
-
-  .stat-block { text-align: center; }
-  .stat-val { color: #32cd32; font-size: 22px; font-weight: bold; }
-  .stat-label { color: #444; font-size: 10px; display: block; text-transform: uppercase; }
-
-</style>
+        .trip-area { position: absolute; top: 20px; right: 30px; text-align: right; }
+        .trip-val { font-size: 22px; color: white; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="dashboard">
-  <div class="top-bar">
-    <div class="signal">⇦</div>
-    <div class="warning-area">
-      <div class="side-stand">⚠ SIDE STAND</div>
-      <div id="fan-indicator" class="fan-on">❄ FAN ON</div>
+<div class="meter-container">
+    <div class="top-row">
+        <div id="l-sig" class="signal">⇦</div>
+        <div id="fan" class="fan-icon">FAN ON</div>
+        <div id="r-sig" class="signal">⇨</div>
     </div>
-    <div class="signal">⇨</div>
-  </div>
 
-  <div class="trip-container">
-    <span class="trip-val">0.0 km</span>
-    <span class="trip-label">TRIP 1</span>
-  </div>
-
-  <div class="rpm-svg-container">
-    <svg viewBox="0 0 600 200">
-      <defs>
-        <linearGradient id="rpmGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="70%" style="stop-color:#32cd32;stop-opacity:1" />
-          <stop offset="90%" style="stop-color:#ff0000;stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <path class="rpm-path" d="M10,180 C100,180 150,150 250,100 C350,50 500,50 580,50" />
-      <path id="rpmFill" class="rpm-fill" d="M10,180 C100,180 150,150 250,100 C350,50 500,50 580,50" />
-    </svg>
-    <div style="color:#444; font-size: 12px; margin-top: -30px; margin-left: 10px;">0 2 4 6 8 10 12 14 16</div>
-  </div>
-
-  <div class="speed-container">
-    <div class="speed-num">0</div>
-    <span class="speed-unit">km/h</span>
-  </div>
-
-  <div class="gear-box">N</div>
-
-  <div class="bottom-stats">
-    <div class="stat-block">
-      <span class="stat-val">0.0°C</span>
-      <span class="stat-label">Coolant</span>
+    <div class="trip-area">
+        <div class="trip-val"><span id="trip">0.0</span> <small style="font-size:12px; color:#444;">TRIP km</small></div>
     </div>
-    <div class="stat-block">
-      <span class="stat-val">0.0V</span>
-      <span class="stat-label">Battery</span>
+
+    <div class="rpm-area">
+        <svg id="rpm-svg" viewBox="0 0 800 300"></svg>
     </div>
-    <div class="stat-block">
-      <span class="stat-val">00000.0</span>
-      <span class="stat-label">Odometer</span>
+
+    <div class="speed-ui">
+        <div id="speed" class="speed-val">0</div>
+        <span class="speed-unit">km/h</span>
     </div>
-  </div>
+
+    <div id="gear" class="gear-ui">N</div>
+
+    <div class="bottom-line">
+        <div style="text-align:center;"><span id="temp" class="stat-val">0.0°C</span><span class="stat-lbl">Coolant</span></div>
+        <div style="text-align:center;"><span id="volt" class="stat-val">0.0V</span><span class="stat-lbl">Battery</span></div>
+        <div style="text-align:center;"><span id="odo" class="stat-val">00000.0</span><span class="stat-lbl">ODO</span></div>
+    </div>
 </div>
 
 <script>
-  // Fan On display logic (උදාහරණයක් විදිහට)
-  function checkTemp(t) {
-    const fan = document.getElementById('fan-indicator');
-    if(t >= 75) fan.style.display = 'block';
-    else fan.style.display = 'none';
-  }
+    const svg = document.getElementById('rpm-svg');
+    const totalSegments = 50;
 
-  // RPM Fill control (මේක ESP32 එකෙන් එන ඩේටා වලට ලින්ක් කරන්න)
-  function setRPM(val) {
-    const path = document.getElementById('rpmFill');
-    const maxVal = 16000;
-    const offset = 1000 - (val / maxVal) * 1000;
-    path.style.strokeDashoffset = offset;
-  }
-</script>
+    // RPM Segments ටික Generate කරනවා (මුල පොඩියි, අග ලොකුයි)
+    for (let i = 0; i < totalSegments; i++) {
+        let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        let startX = 50 + (i * 14);
+        let startY = 220 - (Math.pow(i, 1.6) * 0.4); // Curve එකක් ගන්න math එක
+        
+        path.setAttribute("d", `M ${startX} ${startY} L ${startX + 8} ${startY - 15}`);
+        path.setAttribute("class", "rpm-seg");
+        // RPM වැඩි වෙද්දී Segment එකේ මහත (stroke-width) වැඩි කරනවා
+        path.setAttribute("stroke-width", 4 + (i * 0.4)); 
+        path.setAttribute("id", "seg-" + i);
+        svg.appendChild(path);
+    }
 
-</body>
-</html>
+    function updateDash(rpm, speed, temp, volt, odo, trip, gear, sigL, sigR) {
+        // RPM Update
+        let
