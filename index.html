@@ -2,54 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ninja ZX-10R Full Dash</title>
+    <title>Ninja Split Signal Dash</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap');
 
         body { margin: 0; background: #000; color: white; font-family: 'Rajdhani', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .screen { width: 850px; height: 480px; position: relative; background: #050505; border: 2px solid #1a1a1a; border-radius: 12px; }
 
-        #connect-btn { position: absolute; top: 10px; left: 10px; z-index: 100; background: #32cd32; color: black; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        /* Bluetooth Logo */
+        #ble-icon { position: absolute; top: 15px; left: 20px; z-index: 100; font-size: 24px; cursor: pointer; color: #1a1a1a; transition: 0.3s; }
+        #ble-icon.connected { color: #0066ff; filter: drop-shadow(0 0 10px #0066ff); }
 
-        /* RPM L-Curve */
+        /* Split Signals - අලුත් Layout එක */
+        .sig-box { position: absolute; top: 120px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 45px; color: #111; transition: 0.2s; }
+        #left-sig { left: 20px; }
+        #right-sig { right: 20px; }
+        .sig-on { color: #32cd32; text-shadow: 0 0 20px #32cd32; }
+
+        /* RPM Area */
         .rpm-container { position: absolute; top: 10px; left: 10px; width: 800px; height: 280px; }
         #rpm-svg { width: 100%; height: 100%; }
         .rpm-bg { fill: none; stroke: #111; stroke-width: 14; stroke-linecap: round; }
-        .rpm-fill { fill: none; stroke: #32cd32; stroke-width: 16; stroke-linecap: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; transition: 0.1s linear; filter: drop-shadow(0 0 8px #32cd32); }
+        .rpm-fill { fill: none; stroke: #32cd32; stroke-width: 16; stroke-linecap: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; transition: 0.1s linear; }
 
         /* Center Speed */
-        .speed-ui { position: absolute; top: 52%; left: 45%; transform: translate(-50%, -50%); text-align: center; }
+        .speed-ui { position: absolute; top: 52%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
         .speed-val { font-size: 160px; font-weight: 900; font-family: 'Orbitron'; line-height: 0.8; }
         .unit { font-size: 20px; color: #444; letter-spacing: 3px; }
 
-        /* Gear - Top Right */
-        .gear-box { position: absolute; top: 80px; right: 130px; border: 2px solid #333; padding: 10px 25px; background: #000; border-radius: 8px; }
+        /* Gear */
+        .gear-box { position: absolute; top: 80px; right: 100px; border: 2px solid #333; padding: 10px 25px; background: #000; border-radius: 8px; }
         .gear-val { font-size: 90px; font-weight: 900; color: #32cd32; font-family: 'Orbitron'; line-height: 1; }
 
-        /* Right Side Indicator Column (Ninja Style) */
-        .indicator-col { position: absolute; top: 40px; right: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .icon { width: 50px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; border-radius: 5px; background: #0a0a0a; color: #151515; border: 1px solid #111; transition: 0.3s; }
-        
-        /* Active Colors */
-        .active-left { color: #32cd32; border-color: #32cd32; text-shadow: 0 0 10px #32cd32; }
-        .active-right { color: #32cd32; border-color: #32cd32; text-shadow: 0 0 10px #32cd32; }
-        .active-beam { color: #0066ff; border-color: #0066ff; text-shadow: 0 0 10px #0066ff; }
-        .active-stand { color: #ffcc00; border-color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
-        .active-fan { color: #00f3ff; border-color: #00f3ff; text-shadow: 0 0 10px #00f3ff; animation: blink 1s infinite; }
+        /* Other Indicators (Beam, Stand, Fan) */
+        .mid-icons { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; font-size: 24px; color: #111; }
+        .active-beam { color: #0066ff; text-shadow: 0 0 10px #0066ff; }
+        .active-stand { color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
+        .active-fan { color: #00f3ff; animation: blink 1s infinite; }
 
         @keyframes blink { 50% { opacity: 0.3; } }
 
         /* Bottom Row */
-        .bottom-bar { position: absolute; bottom: 30px; width: 85%; left: 5%; display: flex; justify-content: space-between; border-top: 1px solid #1a1a1a; padding-top: 15px; }
+        .bottom-bar { position: absolute; bottom: 30px; width: 90%; left: 5%; display: flex; justify-content: space-between; border-top: 1px solid #1a1a1a; padding-top: 15px; }
+        .stat-group { cursor: pointer; }
         .stat-val { font-size: 28px; font-weight: bold; color: white; display: block; }
         .stat-lbl { font-size: 11px; color: #444; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<button id="connect-btn">CONNECT ZX-10R</button>
-
 <div class="screen">
+    <div id="ble-icon">ᛒ</div>
+
+    <div id="left-sig" class="sig-box">⬅</div>
+    <div id="right-sig" class="sig-box">➡</div>
+
     <div class="rpm-container">
         <svg id="rpm-svg">
             <path class="rpm-bg" d="M 60 260 L 60 100 Q 60 60 100 60 L 680 60" />
@@ -62,31 +69,42 @@
         <div class="unit">km/h</div>
     </div>
 
-    <div class="gear-box">
-        <div class="gear-val" id="gear">N</div>
-    </div>
+    <div class="gear-box"><div class="gear-val" id="gear">N</div></div>
 
-    <div class="indicator-col">
-        <div id="left-sig" class="icon">⬅</div>
-        <div id="right-sig" class="icon">➡</div>
-        <div id="beam" class="icon">🔆</div>
-        <div id="stand" class="icon">⚠</div>
-        <div id="fan" class="icon">❄</div> </div>
+    <div class="mid-icons">
+        <div id="beam">🔆</div>
+        <div id="stand">⚠</div>
+        <div id="fan">❄</div>
+    </div>
 
     <div class="bottom-bar">
         <div><span class="stat-lbl">Coolant</span><span id="temp" class="stat-val">--°C</span></div>
         <div><span class="stat-lbl">Battery</span><span id="volt" class="stat-val">--V</span></div>
-        <div><span class="stat-lbl">Trip</span><span id="trip" class="stat-val">0.0</span></div>
+        <div id="trip-reset" class="stat-group">
+            <span class="stat-lbl">Trip (Reset)</span>
+            <span id="trip" class="stat-val">0.0</span>
+        </div>
         <div><span class="stat-lbl">Odometer</span><span id="odo" class="stat-val">0000</span></div>
     </div>
 </div>
 
 <script>
-    const connectBtn = document.getElementById('connect-btn');
+    const bleIcon = document.getElementById('ble-icon');
     const rpmPath = document.getElementById('rpm-fill');
     let bleChar;
+    let odoOffset = localStorage.getItem('tripOffset') ? parseFloat(localStorage.getItem('tripOffset')) : 0;
 
-    connectBtn.addEventListener('click', async () => {
+    // Trip Reset Logic
+    document.getElementById('trip-reset').addEventListener('click', () => {
+        let currentOdo = parseFloat(document.getElementById('odo').innerText);
+        if(!isNaN(currentOdo)) {
+            odoOffset = currentOdo;
+            localStorage.setItem('tripOffset', odoOffset);
+            alert("Trip Reset!");
+        }
+    });
+
+    bleIcon.addEventListener('click', async () => {
         try {
             const device = await navigator.bluetooth.requestDevice({
                 filters: [{ name: 'D-Tracker_Smart_Dash' }],
@@ -95,42 +113,40 @@
             const server = await device.gatt.connect();
             const service = await server.getPrimaryService('4fafc201-1fb5-459e-8fcc-c5c9c331914b');
             bleChar = await service.getCharacteristic('beb5483e-36e1-4688-b7f5-ea07361b26a8');
-            
             await bleChar.startNotifications();
-            connectBtn.style.display = 'none';
+            bleIcon.classList.add('connected');
 
             bleChar.addEventListener('characteristicvaluechanged', (event) => {
                 const value = new TextDecoder().decode(event.target.value);
-                const d = value.split(','); // 0:RPM, 1:SPEED, 2:TEMP, 3:VOLT, 4:ODO, 5:NEUT, 6:BEAM, 7:STAND, 8:LEFT, 9:RIGHT
+                const d = value.split(',');
 
                 if(d.length >= 10) {
                     document.getElementById('speed').innerText = Math.round(d[1]);
                     document.getElementById('gear').innerText = (d[5] == "1") ? "N" : "D";
 
-                    // RPM logic
                     let rpm = parseInt(d[0]);
                     let pct = Math.min(rpm / 12000, 1);
                     rpmPath.style.strokeDashoffset = 1000 - (pct * 1000);
                     rpmPath.style.stroke = (rpm > 10000) ? "#ff3131" : "#32cd32";
 
-                    // Stats
                     let tempVal = parseFloat(d[2]);
                     document.getElementById('temp').innerText = tempVal + "°C";
                     document.getElementById('volt').innerText = d[3] + "V";
-                    document.getElementById('odo').innerText = d[4];
-                    document.getElementById('trip').innerText = (parseFloat(d[4]) % 10).toFixed(1);
-
-                    // Indicators (Applying active classes)
-                    document.getElementById('left-sig').className = (d[8] == "1") ? "icon active-left" : "icon";
-                    document.getElementById('right-sig').className = (d[9] == "1") ? "icon active-right" : "icon";
-                    document.getElementById('beam').className = (d[6] == "1") ? "icon active-beam" : "icon";
-                    document.getElementById('stand').className = (d[7] == "1") ? "icon active-stand" : "icon";
                     
-                    // Fan Logic: Temp එක 95°C ට වඩා වැඩි නම් Fan icon එක blink වෙනවා
-                    document.getElementById('fan').className = (tempVal > 95) ? "icon active-fan" : "icon";
+                    let currentOdo = parseFloat(d[4]);
+                    document.getElementById('odo').innerText = currentOdo;
+                    document.getElementById('trip').innerText = (currentOdo - odoOffset).toFixed(1);
+
+                    // Split Signals Update
+                    document.getElementById('left-sig').className = (d[8] == "1") ? "sig-box sig-on" : "sig-box";
+                    document.getElementById('right-sig').className = (d[9] == "1") ? "sig-box sig-on" : "sig-box";
+                    
+                    document.getElementById('beam').className = (d[6] == "1") ? "active-beam" : "";
+                    document.getElementById('stand').className = (d[7] == "1") ? "active-stand" : "";
+                    document.getElementById('fan').className = (tempVal > 95) ? "active-fan" : "";
                 }
             });
-        } catch (e) { console.log(e); }
+        } catch (e) { console.log(e); bleIcon.classList.remove('connected'); }
     });
 </script>
 </body>
