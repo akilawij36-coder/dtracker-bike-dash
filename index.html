@@ -2,40 +2,61 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <title>D-Tracker Custom Dash</title>
+    <title>D-Tracker Smart Dash LIVE</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
         
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Orbitron', sans-serif; overflow: hidden; }
-        .dashboard { width: 850px; height: 480px; position: relative; }
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Orbitron', sans-serif; overflow: hidden; color: white; }
+        .dashboard { width: 850px; height: 480px; position: relative; border: 1px solid #111; }
 
-        /* Speedometer - Original Clear Style */
-        .speed-ui { position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%); text-align: center; }
-        .speed-val { font-size: 180px; font-weight: 900; color: white; line-height: 0.8; }
-        .unit { font-size: 22px; color: #444; }
+        /* Bluetooth Connect Button */
+        #connect-btn { position: absolute; top: 10px; left: 10px; z-index: 100; background: #32cd32; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* RPM Arc - Segmented Look */
-        .rpm-area { position: absolute; top: 40px; left: 30px; width: 800px; height: 300px; }
-        .seg { fill: none; stroke: #151515; stroke-linecap: butt; }
+        /* Speedometer - Center */
+        .speed-ui { position: absolute; top: 52%; left: 38%; transform: translate(-50%, -50%); text-align: center; }
+        .speed-val { font-size: 190px; font-weight: 900; line-height: 0.8; letter-spacing: -5px; }
+        .unit { font-size: 24px; color: #555; }
 
-        /* Gear Indicator - Right Bottom Box */
+        /* RPM Arc */
+        .rpm-area { position: absolute; top: 50px; left: 20px; width: 800px; height: 300px; }
+        .seg { fill: none; stroke: #151515; stroke-linecap: butt; transition: 0.1s; }
+
+        /* Gear - Green Box */
         .gear-ui { 
-            position: absolute; bottom: 80px; right: 50px; font-size: 85px; color: #32cd32; font-weight: 900; 
-            border: 3px solid #32cd32; padding: 10px 35px; border-radius: 20px; text-shadow: 0 0 20px #32cd32;
+            position: absolute; bottom: 85px; right: 60px; font-size: 95px; color: #32cd32; font-weight: 900; 
+            border: 4px solid #32cd32; padding: 12px 38px; border-radius: 25px; text-shadow: 0 0 25px #32cd32;
         }
 
-        /* Warnings & Stats */
-        .top-bar { position: absolute; top: 20px; width: 90%; left: 5%; display: flex; justify-content: space-between; color: #ffcc00; font-size: 16px; }
-        .bottom-bar { position: absolute; bottom: 30px; width: 90%; left: 5%; display: flex; justify-content: space-between; color: #32cd32; font-size: 26px; border-top: 1px solid #111; padding-top: 20px; }
-        .stat-label { font-size: 10px; color: #444; display: block; text-transform: uppercase; }
+        /* Top Warning & Trip */
+        .top-bar { position: absolute; top: 15px; width: 92%; left: 4%; display: flex; justify-content: space-between; align-items: center; }
+        .stand-warn { color: #ffcc00; font-size: 18px; font-weight: bold; text-shadow: 0 0 10px #ffcc00; visibility: hidden; }
+        .trip-info { font-size: 26px; font-weight: 900; }
+
+        /* Indicators */
+        .indicators { position: absolute; top: 60px; width: 100%; display: flex; justify-content: space-around; font-size: 40px; }
+        .active-green { color: #32cd32; text-shadow: 0 0 15px #32cd32; }
+        .active-blue { color: #0066ff; text-shadow: 0 0 15px #0066ff; }
+
+        /* Bottom Stats Bar */
+        .bottom-bar { position: absolute; bottom: 35px; width: 90%; left: 5%; display: flex; justify-content: space-between; border-top: 1px solid #1a1a1a; padding-top: 22px; }
+        .stat-val { font-size: 30px; font-weight: 900; color: #32cd32; display: block; text-align: center; }
+        .stat-lbl { font-size: 11px; color: #444; text-transform: uppercase; display: block; text-align: center; }
     </style>
 </head>
 <body>
 
+<button id="connect-btn">CONNECT BIKE</button>
+
 <div class="dashboard">
     <div class="top-bar">
-        <div id="stand">⚠ SIDE STAND</div>
-        <div id="trip">5.2 <small style="color:#444">TRIP km</small></div>
+        <div id="beam" style="font-size: 24px; color: #111;">HIGH BEAM</div>
+        <div id="stand" class="stand-warn">⚠ SIDE STAND</div>
+        <div class="trip-info"><span id="odo">0.0</span> <small style="font-size:12px; color:#444">ODO km</small></div>
+    </div>
+
+    <div class="indicators">
+        <div id="left-sig" style="color: #111;">⬅</div>
+        <div id="right-sig" style="color: #111;">➡</div>
     </div>
 
     <div class="rpm-area">
@@ -50,39 +71,83 @@
     <div id="gear" class="gear-ui">N</div>
 
     <div class="bottom-bar">
-        <div style="text-align:center;">78.0°C<span class="stat-label">Coolant</span></div>
-        <div style="text-align:center;">12.6V<span class="stat-label">Battery</span></div>
-        <div style="text-align:center;">01250<span class="stat-label">ODO Meter</span></div>
+        <div><span id="temp" class="stat-val">0.0°C</span><span class="stat-lbl">Coolant</span></div>
+        <div><span id="volt" class="stat-val">0.0V</span><span class="stat-lbl">Battery</span></div>
+        <div><span id="trip" class="stat-val">0.0</span><span class="stat-lbl">TRIP</span></div>
     </div>
 </div>
 
 <script>
+    // RPM Segments Generator
     const svg = document.getElementById('rpm-svg');
-    const totalSegs = 50;
+    const totalSegs = 52;
     for (let i = 0; i < totalSegs; i++) {
         let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        let x = 50 + (i * 14.5);
-        let y = 240 - (Math.pow(i, 1.5) * 0.4); // Curve එක
-        p.setAttribute("d", `M ${x} ${y} L ${x + 10} ${y - 15}`);
+        let x = 40 + (i * 14.2);
+        let y = 245 - (Math.pow(i, 1.52) * 0.42); 
+        p.setAttribute("d", `M ${x} ${y} L ${x + 10} ${y - 18}`);
         p.setAttribute("class", "seg");
-        p.setAttribute("stroke-width", 6 + (i * 0.3)); // පස්සට යද්දී මහත වැඩි වෙනවා
-        p.setAttribute("id", "s-" + i);
+        p.setAttribute("stroke-width", 5 + (i * 0.4)); 
+        p.setAttribute("id", "seg-" + i);
         svg.appendChild(p);
     }
 
-    function setRPM(val) {
-        let active = Math.floor((val / 12000) * totalSegs);
-        for (let i = 0; i < totalSegs; i++) {
-            let s = document.getElementById("s-" + i);
-            if (i < active) {
-                s.style.stroke = (i > 42) ? "#ff3131" : "#32cd32";
-                s.style.filter = "drop-shadow(0 0 5px currentColor)";
-            } else {
-                s.style.stroke = "#151515"; s.style.filter = "none";
-            }
+    // BLE Logic
+    const connectBtn = document.getElementById('connect-btn');
+    let bleChar;
+
+    connectBtn.addEventListener('click', async () => {
+        try {
+            const device = await navigator.bluetooth.requestDevice({
+                filters: [{ name: 'D-Tracker_Smart_Dash' }],
+                optionalServices: ['4fafc201-1fb5-459e-8fcc-c5c9c331914b']
+            });
+            const server = await device.gatt.connect();
+            const service = await server.getPrimaryService('4fafc201-1fb5-459e-8fcc-c5c9c331914b');
+            bleChar = await service.getCharacteristic('beb5483e-36e1-4688-b7f5-ea07361b26a8');
+            
+            await bleChar.startNotifications();
+            connectBtn.style.display = 'none';
+
+            bleChar.addEventListener('characteristicvaluechanged', (event) => {
+                const value = new TextDecoder().decode(event.target.value);
+                const d = value.split(','); 
+                // ESP Format: RPM[0], SPEED[1], TEMP[2], VOLT[3], ODO[4], NEUT[5], BEAM[6], STAND[7], LEFT[8], RIGHT[9]
+
+                if(d.length >= 10) {
+                    // Update Speed & Gear
+                    document.getElementById('speed').innerText = Math.round(d[1]);
+                    document.getElementById('gear').innerText = (d[5] == "1") ? "N" : "D"; // Neutral pin එක අනුව
+
+                    // Update RPM
+                    let rpm = parseInt(d[0]);
+                    let active = Math.floor((rpm / 12000) * totalSegs);
+                    for (let i = 0; i < totalSegs; i++) {
+                        let s = document.getElementById("seg-" + i);
+                        if (i < active) {
+                            s.style.stroke = (i > 42) ? "#ff3131" : "#32cd32";
+                            s.style.filter = "drop-shadow(0 0 8px currentColor)";
+                        } else {
+                            s.style.stroke = "#151515"; s.style.filter = "none";
+                        }
+                    }
+
+                    // Update Stats
+                    document.getElementById('temp').innerText = d[2] + "°C";
+                    document.getElementById('volt').innerText = d[3] + "V";
+                    document.getElementById('odo').innerText = d[4];
+                    
+                    // Warnings & Indicators
+                    document.getElementById('stand').style.visibility = (d[7] == "1") ? "visible" : "hidden";
+                    document.getElementById('beam').style.color = (d[6] == "1") ? "#0066ff" : "#111";
+                    document.getElementById('left-sig').style.color = (d[8] == "1") ? "#32cd32" : "#111";
+                    document.getElementById('right-sig').style.color = (d[9] == "1") ? "#32cd32" : "#111";
+                }
+            });
+        } catch (error) {
+            console.log("BLE Error: " + error);
         }
-    }
-    setRPM(4500);
+    });
 </script>
 </body>
 </html>
