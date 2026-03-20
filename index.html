@@ -1,108 +1,89 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>S1000RR K67 Official Dash</title>
+    <title>Ninja ZX-10R Full Dash</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap');
+
+        body { margin: 0; background: #000; color: white; font-family: 'Rajdhani', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .screen { width: 850px; height: 480px; position: relative; background: #050505; border: 2px solid #1a1a1a; border-radius: 12px; }
+
+        #connect-btn { position: absolute; top: 10px; left: 10px; z-index: 100; background: #32cd32; color: black; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        /* RPM L-Curve */
+        .rpm-container { position: absolute; top: 10px; left: 10px; width: 800px; height: 280px; }
+        #rpm-svg { width: 100%; height: 100%; }
+        .rpm-bg { fill: none; stroke: #111; stroke-width: 14; stroke-linecap: round; }
+        .rpm-fill { fill: none; stroke: #32cd32; stroke-width: 16; stroke-linecap: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; transition: 0.1s linear; filter: drop-shadow(0 0 8px #32cd32); }
+
+        /* Center Speed */
+        .speed-ui { position: absolute; top: 52%; left: 45%; transform: translate(-50%, -50%); text-align: center; }
+        .speed-val { font-size: 160px; font-weight: 900; font-family: 'Orbitron'; line-height: 0.8; }
+        .unit { font-size: 20px; color: #444; letter-spacing: 3px; }
+
+        /* Gear - Top Right */
+        .gear-box { position: absolute; top: 80px; right: 130px; border: 2px solid #333; padding: 10px 25px; background: #000; border-radius: 8px; }
+        .gear-val { font-size: 90px; font-weight: 900; color: #32cd32; font-family: 'Orbitron'; line-height: 1; }
+
+        /* Right Side Indicator Column (Ninja Style) */
+        .indicator-col { position: absolute; top: 40px; right: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .icon { width: 50px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 24px; border-radius: 5px; background: #0a0a0a; color: #151515; border: 1px solid #111; transition: 0.3s; }
         
-        body { margin: 0; background: #000; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .screen { width: 850px; height: 480px; position: relative; background: #000; border: 2px solid #111; border-radius: 10px; }
+        /* Active Colors */
+        .active-left { color: #32cd32; border-color: #32cd32; text-shadow: 0 0 10px #32cd32; }
+        .active-right { color: #32cd32; border-color: #32cd32; text-shadow: 0 0 10px #32cd32; }
+        .active-beam { color: #0066ff; border-color: #0066ff; text-shadow: 0 0 10px #0066ff; }
+        .active-stand { color: #ffcc00; border-color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
+        .active-fan { color: #00f3ff; border-color: #00f3ff; text-shadow: 0 0 10px #00f3ff; animation: blink 1s infinite; }
 
-        #connect-btn { position: absolute; top: 10px; left: 10px; z-index: 100; background: #0066ff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        @keyframes blink { 50% { opacity: 0.3; } }
 
-        /* Top Info Bar */
-        .top-status { position: absolute; top: 15px; width: 94%; left: 3%; display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .mode { color: #00f3ff; }
-
-        /* Center RPM Gauge - S1000RR Style */
-        .rpm-gauge { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); width: 500px; height: 300px; }
-        .rpm-circle { fill: none; stroke: #222; stroke-width: 25; stroke-dasharray: 628; stroke-dashoffset: 0; stroke-linecap: butt; }
-        .rpm-active { fill: none; stroke: url(#grad); stroke-width: 25; stroke-dasharray: 628; stroke-dashoffset: 628; transition: 0.1s linear; stroke-linecap: butt; }
-        
-        .rpm-number { position: absolute; top: 210px; left: 50%; transform: translateX(-50%); text-align: center; }
-        .rpm-val { font-size: 30px; font-weight: 900; }
-        .rpm-label { font-size: 10px; color: #666; letter-spacing: 2px; }
-
-        /* Speed & Gear */
-        .speed-unit { position: absolute; top: 80px; left: 330px; text-align: right; }
-        .speed-val { font-size: 85px; font-weight: 900; display: block; line-height: 1; }
-        .gear-val { position: absolute; top: 80px; right: 330px; font-size: 85px; font-weight: 900; color: #fff; }
-
-        /* Side Widgets (DTC & Brake Style) */
-        .widget { position: absolute; top: 180px; width: 120px; height: 180px; border: 1px solid #222; background: rgba(10,10,10,0.8); border-radius: 5px; }
-        .widget-l { left: 40px; }
-        .widget-r { right: 40px; }
-        .widget-head { background: #111; font-size: 12px; padding: 5px; text-align: center; font-weight: bold; color: #888; border-bottom: 1px solid #222; }
-        
-        /* Bottom Bar */
-        .bottom-bar { position: absolute; bottom: 15px; width: 94%; left: 3%; display: flex; justify-content: space-between; font-size: 16px; color: #aaa; border-top: 1px solid #333; padding-top: 10px; }
-
-        /* Warnings */
-        .stand-warn { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); color: #ffcc00; font-weight: bold; font-size: 14px; visibility: hidden; }
+        /* Bottom Row */
+        .bottom-bar { position: absolute; bottom: 30px; width: 85%; left: 5%; display: flex; justify-content: space-between; border-top: 1px solid #1a1a1a; padding-top: 15px; }
+        .stat-val { font-size: 28px; font-weight: bold; color: white; display: block; }
+        .stat-lbl { font-size: 11px; color: #444; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<button id="connect-btn">CONNECT S1000RR</button>
+<button id="connect-btn">CONNECT ZX-10R</button>
 
 <div class="screen">
-    <div class="top-status">
-        <div id="clock">04:46 PM</div>
-        <div class="mode">ROAD</div>
-        <div id="odo-top">2513 KM</div>
-    </div>
-
-    <div id="stand" class="stand-warn">⚠ SIDE STAND DOWN</div>
-
-    <div class="speed-unit">
-        <span class="speed-val" id="speed">0</span>
-        <span style="color:#666; font-size:12px;">km/h</span>
-    </div>
-
-    <div class="gear-val" id="gear">N</div>
-
-    <div class="widget widget-l">
-        <div class="widget-head">VOLT</div>
-        <div id="volt-val" style="font-size: 24px; text-align: center; margin-top: 50px; font-weight: bold; color: #00f3ff;">12.6V</div>
-    </div>
-
-    <div class="widget widget-r">
-        <div class="widget-head">TEMP</div>
-        <div id="temp-val" style="font-size: 24px; text-align: center; margin-top: 50px; font-weight: bold; color: #ff3131;">78°C</div>
-    </div>
-
-    <div class="rpm-gauge">
-        <svg width="500" height="300" viewBox="0 0 500 250">
-            <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color:#0066ff;stop-opacity:1" />
-                    <stop offset="70%" style="stop-color:#00f3ff;stop-opacity:1" />
-                    <stop offset="90%" style="stop-color:#ff3131;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-            <path class="rpm-circle" d="M 100 220 A 150 150 0 1 1 400 220" />
-            <path id="rpm-path" class="rpm-active" d="M 100 220 A 150 150 0 1 1 400 220" />
-            
-            <text x="80" y="235" fill="#444" font-size="12">0</text>
-            <text x="250" y="60" fill="#444" font-size="12" text-anchor="middle">7</text>
-            <text x="420" y="235" fill="#444" font-size="12">14</text>
+    <div class="rpm-container">
+        <svg id="rpm-svg">
+            <path class="rpm-bg" d="M 60 260 L 60 100 Q 60 60 100 60 L 680 60" />
+            <path id="rpm-fill" class="rpm-fill" d="M 60 260 L 60 100 Q 60 60 100 60 L 680 60" />
         </svg>
-        <div class="rpm-number">
-            <div class="rpm-val" id="rpm-txt">0</div>
-            <div class="rpm-label">RPM x 1000</div>
-        </div>
     </div>
+
+    <div class="speed-ui">
+        <div class="speed-val" id="speed">0</div>
+        <div class="unit">km/h</div>
+    </div>
+
+    <div class="gear-box">
+        <div class="gear-val" id="gear">N</div>
+    </div>
+
+    <div class="indicator-col">
+        <div id="left-sig" class="icon">⬅</div>
+        <div id="right-sig" class="icon">➡</div>
+        <div id="beam" class="icon">🔆</div>
+        <div id="stand" class="icon">⚠</div>
+        <div id="fan" class="icon">❄</div> </div>
 
     <div class="bottom-bar">
-        <div id="trip">TRIP 5.2 KM</div>
-        <div style="color: #32cd32;">● READY</div>
-        <div id="volt-bottom">12.6 V</div>
+        <div><span class="stat-lbl">Coolant</span><span id="temp" class="stat-val">--°C</span></div>
+        <div><span class="stat-lbl">Battery</span><span id="volt" class="stat-val">--V</span></div>
+        <div><span class="stat-lbl">Trip</span><span id="trip" class="stat-val">0.0</span></div>
+        <div><span class="stat-lbl">Odometer</span><span id="odo" class="stat-val">0000</span></div>
     </div>
 </div>
 
 <script>
     const connectBtn = document.getElementById('connect-btn');
+    const rpmPath = document.getElementById('rpm-fill');
     let bleChar;
 
     connectBtn.addEventListener('click', async () => {
@@ -120,39 +101,37 @@
 
             bleChar.addEventListener('characteristicvaluechanged', (event) => {
                 const value = new TextDecoder().decode(event.target.value);
-                const d = value.split(','); // RPM,SPEED,TEMP,VOLT,ODO,NEUT,BEAM,STAND,LEFT,RIGHT
+                const d = value.split(','); // 0:RPM, 1:SPEED, 2:TEMP, 3:VOLT, 4:ODO, 5:NEUT, 6:BEAM, 7:STAND, 8:LEFT, 9:RIGHT
 
                 if(d.length >= 10) {
-                    // Speed & Gear
                     document.getElementById('speed').innerText = Math.round(d[1]);
                     document.getElementById('gear').innerText = (d[5] == "1") ? "N" : "D";
 
-                    // RPM Circle Update
+                    // RPM logic
                     let rpm = parseInt(d[0]);
-                    let rpmK = (rpm / 1000).toFixed(1);
-                    document.getElementById('rpm-txt').innerText = rpmK;
-                    
-                    let dashOffset = 628 - (rpm / 14000) * 628;
-                    document.getElementById('rpm-path').style.strokeDashoffset = dashOffset;
+                    let pct = Math.min(rpm / 12000, 1);
+                    rpmPath.style.strokeDashoffset = 1000 - (pct * 1000);
+                    rpmPath.style.stroke = (rpm > 10000) ? "#ff3131" : "#32cd32";
 
-                    // Widgets
-                    document.getElementById('temp-val').innerText = d[2] + "°C";
-                    document.getElementById('volt-val').innerText = d[3] + "V";
-                    document.getElementById('volt-bottom').innerText = d[3] + " V";
-                    document.getElementById('odo-top').innerText = d[4] + " KM";
+                    // Stats
+                    let tempVal = parseFloat(d[2]);
+                    document.getElementById('temp').innerText = tempVal + "°C";
+                    document.getElementById('volt').innerText = d[3] + "V";
+                    document.getElementById('odo').innerText = d[4];
+                    document.getElementById('trip').innerText = (parseFloat(d[4]) % 10).toFixed(1);
+
+                    // Indicators (Applying active classes)
+                    document.getElementById('left-sig').className = (d[8] == "1") ? "icon active-left" : "icon";
+                    document.getElementById('right-sig').className = (d[9] == "1") ? "icon active-right" : "icon";
+                    document.getElementById('beam').className = (d[6] == "1") ? "icon active-beam" : "icon";
+                    document.getElementById('stand').className = (d[7] == "1") ? "icon active-stand" : "icon";
                     
-                    // Stand Warning
-                    document.getElementById('stand').style.visibility = (d[7] == "1") ? "visible" : "hidden";
+                    // Fan Logic: Temp එක 95°C ට වඩා වැඩි නම් Fan icon එක blink වෙනවා
+                    document.getElementById('fan').className = (tempVal > 95) ? "icon active-fan" : "icon";
                 }
             });
-        } catch (error) { console.log(error); }
+        } catch (e) { console.log(e); }
     });
-
-    // Time update
-    setInterval(() => {
-        let now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    }, 1000);
 </script>
 </body>
 </html>
