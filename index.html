@@ -2,106 +2,106 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <title>S1000RR M-Performance Dash</title>
+    <title>S1000RR K67 Official Dash</title>
     <style>
-        /* BMW පාවිච්චි කරන Roboto ෆොන්ට් එක වගේ එකක් */
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Roboto', sans-serif; overflow: hidden; color: white; }
+        body { margin: 0; background: #000; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .screen { width: 850px; height: 480px; position: relative; background: #000; border: 2px solid #111; border-radius: 10px; }
+
+        #connect-btn { position: absolute; top: 10px; left: 10px; z-index: 100; background: #0066ff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        /* Top Info Bar */
+        .top-status { position: absolute; top: 15px; width: 94%; left: 3%; display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .mode { color: #00f3ff; }
+
+        /* Center RPM Gauge - S1000RR Style */
+        .rpm-gauge { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); width: 500px; height: 300px; }
+        .rpm-circle { fill: none; stroke: #222; stroke-width: 25; stroke-dasharray: 628; stroke-dashoffset: 0; stroke-linecap: butt; }
+        .rpm-active { fill: none; stroke: url(#grad); stroke-width: 25; stroke-dasharray: 628; stroke-dashoffset: 628; transition: 0.1s linear; stroke-linecap: butt; }
         
-        /* AMOLED Screen එකක් වගේ පේන්න pure black */
-        .dashboard { width: 850px; height: 480px; position: relative; border: 1px solid #111; box-shadow: 0 0 50px #000; }
+        .rpm-number { position: absolute; top: 210px; left: 50%; transform: translateX(-50%); text-align: center; }
+        .rpm-val { font-size: 30px; font-weight: 900; }
+        .rpm-label { font-size: 10px; color: #666; letter-spacing: 2px; }
 
-        /* Bluetooth Connect Button - BMW Blue */
-        #connect-btn { position: absolute; top: 10px; left: 10px; z-index: 100; background: #0066ff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        /* Speed & Gear */
+        .speed-unit { position: absolute; top: 80px; left: 330px; text-align: right; }
+        .speed-val { font-size: 85px; font-weight: 900; display: block; line-height: 1; }
+        .gear-val { position: absolute; top: 80px; right: 330px; font-size: 85px; font-weight: 900; color: #fff; }
 
-        /* Top Bar - Warnings & M Logo */
-        .top-bar { position: absolute; top: 15px; width: 92%; left: 4%; display: flex; justify-content: space-between; align-items: center; z-index: 50; }
-        .stand-warn { color: #ffcc00; font-size: 16px; font-weight: bold; visibility: hidden; }
-        .m-logo { font-size: 20px; font-weight: 900; color: #fff; letter-spacing: -1px; }
-        .trip-info { font-size: 20px; color: #666; }
+        /* Side Widgets (DTC & Brake Style) */
+        .widget { position: absolute; top: 180px; width: 120px; height: 180px; border: 1px solid #222; background: rgba(10,10,10,0.8); border-radius: 5px; }
+        .widget-l { left: 40px; }
+        .widget-r { right: 40px; }
+        .widget-head { background: #111; font-size: 12px; padding: 5px; text-align: center; font-weight: bold; color: #888; border-bottom: 1px solid #222; }
+        
+        /* Bottom Bar */
+        .bottom-bar { position: absolute; bottom: 15px; width: 94%; left: 3%; display: flex; justify-content: space-between; font-size: 16px; color: #aaa; border-top: 1px solid #333; padding-top: 10px; }
 
-        /* S1000RR Linear RPM Arc - Super Dynamic */
-        .rpm-area { position: absolute; top: 120px; left: 0px; width: 100%; height: 200px; z-index: 5; }
-        .seg { fill: none; stroke: #1a1a1a; stroke-width: 15; stroke-linecap: butt; }
-
-        /* Speedometer - Bold & Direct */
-        .speed-ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 10; }
-        .speed-val { font-size: 190px; font-weight: 900; line-height: 0.8; letter-spacing: -5px; }
-        .unit { font-size: 20px; color: #444; text-transform: uppercase; margin-top: 5px; }
-
-        /* Gear - Large BMW Style */
-        .gear-ui { 
-            position: absolute; bottom: 80px; left: 60px; font-size: 120px; color: white; font-weight: 900; 
-            background: rgba(0,0,0,0.8); padding: 5px 25px; border-radius: 10px; border: 1px solid #222;
-        }
-
-        /* Indicators & Clock (Top Corners) */
-        .corner-data { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; color: #333; font-size: 30px; }
-        .active-sig { color: #32cd32; text-shadow: 0 0 10px #32cd32; }
-
-        /* Bottom Data Line - Clear & Structured */
-        .bottom-bar { 
-            position: absolute; bottom: 30px; width: 90%; left: 5%; 
-            display: flex; justify-content: space-between; border-top: 1px solid #111; padding-top: 15px; 
-            z-index: 20;
-        }
-        .stat-val { font-size: 26px; font-weight: bold; color: white; display: block; text-align: center; }
-        .stat-lbl { font-size: 10px; color: #444; text-transform: uppercase; display: block; text-align: center; }
+        /* Warnings */
+        .stand-warn { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); color: #ffcc00; font-weight: bold; font-size: 14px; visibility: hidden; }
     </style>
 </head>
 <body>
 
-<button id="connect-btn">CONNECT M-PERFORMANCE</button>
+<button id="connect-btn">CONNECT S1000RR</button>
 
-<div class="dashboard">
-    <div class="corner-data">
-        <div id="left-sig">⬅</div>
-        <div id="right-sig">➡</div>
-    </div>
-    
-    <div class="top-bar">
-        <div id="stand" class="stand-warn">⚠ SIDE STAND</div>
-        <div class="m-logo">///M Performance</div>
-        <div class="trip-info">OD <span id="odo">0.0</span> km</div>
+<div class="screen">
+    <div class="top-status">
+        <div id="clock">04:46 PM</div>
+        <div class="mode">ROAD</div>
+        <div id="odo-top">2513 KM</div>
     </div>
 
-    <div class="rpm-area">
-        <svg id="rpm-svg" viewBox="0 0 850 300"></svg>
+    <div id="stand" class="stand-warn">⚠ SIDE STAND DOWN</div>
+
+    <div class="speed-unit">
+        <span class="speed-val" id="speed">0</span>
+        <span style="color:#666; font-size:12px;">km/h</span>
     </div>
 
-    <div class="speed-ui">
-        <div id="speed" class="speed-val">0</div>
-        <div class="unit">km/h</div>
+    <div class="gear-val" id="gear">N</div>
+
+    <div class="widget widget-l">
+        <div class="widget-head">VOLT</div>
+        <div id="volt-val" style="font-size: 24px; text-align: center; margin-top: 50px; font-weight: bold; color: #00f3ff;">12.6V</div>
     </div>
 
-    <div id="gear" class="gear-ui">N</div>
+    <div class="widget widget-r">
+        <div class="widget-head">TEMP</div>
+        <div id="temp-val" style="font-size: 24px; text-align: center; margin-top: 50px; font-weight: bold; color: #ff3131;">78°C</div>
+    </div>
+
+    <div class="rpm-gauge">
+        <svg width="500" height="300" viewBox="0 0 500 250">
+            <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#0066ff;stop-opacity:1" />
+                    <stop offset="70%" style="stop-color:#00f3ff;stop-opacity:1" />
+                    <stop offset="90%" style="stop-color:#ff3131;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path class="rpm-circle" d="M 100 220 A 150 150 0 1 1 400 220" />
+            <path id="rpm-path" class="rpm-active" d="M 100 220 A 150 150 0 1 1 400 220" />
+            
+            <text x="80" y="235" fill="#444" font-size="12">0</text>
+            <text x="250" y="60" fill="#444" font-size="12" text-anchor="middle">7</text>
+            <text x="420" y="235" fill="#444" font-size="12">14</text>
+        </svg>
+        <div class="rpm-number">
+            <div class="rpm-val" id="rpm-txt">0</div>
+            <div class="rpm-label">RPM x 1000</div>
+        </div>
+    </div>
 
     <div class="bottom-bar">
-        <div><span id="temp" class="stat-val">0.0°C</span><span class="stat-lbl">Engine Temp</span></div>
-        <div><span id="volt" class="stat-val">0.0V</span><span class="stat-lbl">Battery V</span></div>
-        <div><span id="trip" class="stat-val">0.0 km</span><span class="stat-lbl">Trip 1</span></div>
+        <div id="trip">TRIP 5.2 KM</div>
+        <div style="color: #32cd32;">● READY</div>
+        <div id="volt-bottom">12.6 V</div>
     </div>
 </div>
 
 <script>
-    // RPM Segments Generator (S1000RR Linear Arc Style)
-    const svg = document.getElementById('rpm-svg');
-    const totalSegs = 60; // තව smooth වෙන්න කෑලි ගාණ වැඩි කළා
-    for (let i = 0; i < totalSegs; i++) {
-        let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        let x = 30 + (i * 13.2); // පරතරය අඩු කළා
-        let y = 250 - (Math.pow(i, 1.4) * 0.35); // පරණ curve එකම BMW arc එකක් වගේ structure කළා
-        
-        p.setAttribute("d", `M ${x} ${y} L ${x + 8} ${y - 18}`);
-        p.setAttribute("class", "seg");
-        // S1000RR එකේ වගේ progressive width - පස්සට යද්දී මහත වැඩි වෙනවා
-        p.setAttribute("stroke-width", 6 + (i * 0.35)); 
-        p.setAttribute("id", "seg-" + i);
-        svg.appendChild(p);
-    }
-
-    // BLE Connecting Logic (ඔයාගේ ESP Code එකට ගැළපෙන්න)
     const connectBtn = document.getElementById('connect-btn');
     let bleChar;
 
@@ -120,51 +120,39 @@
 
             bleChar.addEventListener('characteristicvaluechanged', (event) => {
                 const value = new TextDecoder().decode(event.target.value);
-                const d = value.split(','); 
-                // ESP CSV Data: RPM[0], SPEED[1], TEMP[2], VOLT[3], ODO[4], NEUT[5], BEAM[6], STAND[7], LEFT[8], RIGHT[9]
+                const d = value.split(','); // RPM,SPEED,TEMP,VOLT,ODO,NEUT,BEAM,STAND,LEFT,RIGHT
 
                 if(d.length >= 10) {
-                    // Update Speed & Gear (BMW Style)
+                    // Speed & Gear
                     document.getElementById('speed').innerText = Math.round(d[1]);
                     document.getElementById('gear').innerText = (d[5] == "1") ? "N" : "D";
 
-                    // Update RPM (S1000RR Arc animation)
+                    // RPM Circle Update
                     let rpm = parseInt(d[0]);
-                    let active = Math.floor((rpm / 14000) * totalSegs); // 14k RPM limit
-                    for (let i = 0; i < totalSegs; i++) {
-                        let s = document.getElementById("seg-" + i);
-                        if (i < active) {
-                            if (i > 50) { // BMW Redline
-                                s.style.stroke = "#ff3131"; 
-                                s.style.filter = "drop-shadow(0 0 10px #ff3131)";
-                            } else if (i > 40) { // BMW Blue/Yellow transition
-                                s.style.stroke = "#ffcc00"; 
-                                s.style.filter = "drop-shadow(0 0 8px #ffcc00)";
-                            } else { // Standard M Blue
-                                s.style.stroke = "#0066ff"; 
-                                s.style.filter = "drop-shadow(0 0 6px #0066ff)";
-                            }
-                        } else {
-                            s.style.stroke = "#1a1a1a"; s.style.filter = "none";
-                        }
-                    }
-
-                    // Update Stats (BMW structured layout)
-                    document.getElementById('temp').innerText = d[2] + "°C";
-                    document.getElementById('volt').innerText = d[3] + "V";
-                    document.getElementById('odo').innerText = d[4];
-                    document.getElementById('trip').innerText = (parseFloat(d[4]) % 10.0).toFixed(1) + " km"; // Sample trip calculation
+                    let rpmK = (rpm / 1000).toFixed(1);
+                    document.getElementById('rpm-txt').innerText = rpmK;
                     
-                    // Warnings & Indicators (Corners)
+                    let dashOffset = 628 - (rpm / 14000) * 628;
+                    document.getElementById('rpm-path').style.strokeDashoffset = dashOffset;
+
+                    // Widgets
+                    document.getElementById('temp-val').innerText = d[2] + "°C";
+                    document.getElementById('volt-val').innerText = d[3] + "V";
+                    document.getElementById('volt-bottom').innerText = d[3] + " V";
+                    document.getElementById('odo-top').innerText = d[4] + " KM";
+                    
+                    // Stand Warning
                     document.getElementById('stand').style.visibility = (d[7] == "1") ? "visible" : "hidden";
-                    document.getElementById('left-sig').className = (d[8] == "1") ? "active-sig" : "";
-                    document.getElementById('right-sig').className = (d[9] == "1") ? "active-sig" : "";
                 }
             });
-        } catch (error) {
-            console.log("BLE Error: " + error);
-        }
+        } catch (error) { console.log(error); }
     });
+
+    // Time update
+    setInterval(() => {
+        let now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }, 1000);
 </script>
 </body>
 </html>
