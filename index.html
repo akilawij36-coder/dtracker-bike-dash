@@ -2,72 +2,40 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Tracker Pro Dash v15.4</title>
+    <title>D-Tracker Custom Dash</title>
     <style>
-        :root {
-            --kawasaki-green: #32cd32; --danger-red: #ff3131; --warning-yellow: #ffcc00; --bg-black: #000;
-        }
-        body { background-color: var(--bg-black); color: white; font-family: 'Orbitron', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
         
-        .meter-container { 
-            position: relative; width: 850px; height: 480px; background: #000; border-radius: 40px; border: 2px solid #111; overflow: hidden; 
-        }
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        .dashboard { width: 850px; height: 480px; position: relative; }
 
-        /* Top Bar */
-        .top-row { position: absolute; top: 15px; width: 92%; left: 4%; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .signal { font-size: 35px; color: #1a1a1a; }
-        .signal-active { color: var(--kawasaki-green); text-shadow: 0 0 20px var(--kawasaki-green); }
-        .center-warnings { text-align: center; }
-        .stand-warning { color: var(--warning-yellow); font-size: 16px; font-weight: bold; text-shadow: 0 0 10px var(--warning-yellow); margin-bottom: 2px; }
-        .fan-icon { font-size: 11px; color: #00f3ff; text-shadow: 0 0 10px #00f3ff; font-weight: bold; }
+        /* Speedometer - Original Clear Style */
+        .speed-ui { position: absolute; top: 50%; left: 40%; transform: translate(-50%, -50%); text-align: center; }
+        .speed-val { font-size: 180px; font-weight: 900; color: white; line-height: 0.8; }
+        .unit { font-size: 22px; color: #444; }
 
-        /* Trip Meter (Top Right) */
-        .trip-area { text-align: right; font-family: 'Orbitron', sans-serif; }
-        .trip-val { font-size: 24px; color: white; font-weight: 900; }
-        .trip-lbl { font-size: 10px; color: #444; display: block; margin-top: -5px; }
+        /* RPM Arc - Segmented Look */
+        .rpm-area { position: absolute; top: 40px; left: 30px; width: 800px; height: 300px; }
+        .seg { fill: none; stroke: #151515; stroke-linecap: butt; }
 
-        /* RPM Area - SVG Curve (Clean & Sharp) */
-        .rpm-area { position: absolute; top: 40px; left: 20px; width: 800px; height: 280px; z-index: 5; }
-        .rpm-seg { fill: none; stroke: #151515; stroke-linecap: butt; }
-
-        /* Speedometer - No White Box (Clean Look) */
-        .speed-ui { position: absolute; top: 150px; left: 38%; transform: translateX(-50%); text-align: center; z-index: 10; }
-        .speed-val { font-size: 190px; font-weight: 900; line-height: 0.8; letter-spacing: -10px; text-shadow: 0 0 30px rgba(255,255,255,0.1); }
-        .speed-unit { font-size: 22px; color: #444; font-weight: bold; display: block; margin-top: 5px; }
-
-        /* Gear Indicator (Right Side Balanced) */
+        /* Gear Indicator - Right Bottom Box */
         .gear-ui { 
-            position: absolute; bottom: 100px; right: 60px; font-size: 90px; color: var(--kawasaki-green); font-weight: 900; 
-            border: 4px solid var(--kawasaki-green); padding: 10px 35px; border-radius: 25px; text-shadow: 0 0 25px var(--kawasaki-green);
-            box-shadow: inset 0 0 20px rgba(50, 205, 50, 0.2);
+            position: absolute; bottom: 80px; right: 50px; font-size: 85px; color: #32cd32; font-weight: 900; 
+            border: 3px solid #32cd32; padding: 10px 35px; border-radius: 20px; text-shadow: 0 0 20px #32cd32;
         }
 
-        /* Bottom Stats Bar */
-        .bottom-line { 
-            position: absolute; bottom: 30px; width: 90%; left: 5%; display: flex; justify-content: space-between; border-top: 1px solid #111; padding-top: 20px;
-        }
-        .stat-block { text-align: center; }
-        .stat-val { font-size: 28px; font-weight: 900; color: var(--kawasaki-green); display: block; }
-        .stat-lbl { font-size: 11px; color: #444; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
-
+        /* Warnings & Stats */
+        .top-bar { position: absolute; top: 20px; width: 90%; left: 5%; display: flex; justify-content: space-between; color: #ffcc00; font-size: 16px; }
+        .bottom-bar { position: absolute; bottom: 30px; width: 90%; left: 5%; display: flex; justify-content: space-between; color: #32cd32; font-size: 26px; border-top: 1px solid #111; padding-top: 20px; }
+        .stat-label { font-size: 10px; color: #444; display: block; text-transform: uppercase; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="meter-container">
-    <div class="top-row">
-        <div id="l-sig" class="signal">⇦</div>
-        <div class="center-warnings">
-            <div id="stand-id" class="stand-warning">⚠ SIDE STAND</div>
-            <div id="fan-id" class="fan-icon">FAN ON</div>
-        </div>
-        <div class="trip-area">
-            <span class="trip-val" id="trip">5.2</span>
-            <span class="trip-lbl">TRIP km</span>
-        </div>
-        <div id="r-sig" class="signal">⇨</div>
+<div class="dashboard">
+    <div class="top-bar">
+        <div id="stand">⚠ SIDE STAND</div>
+        <div id="trip">5.2 <small style="color:#444">TRIP km</small></div>
     </div>
 
     <div class="rpm-area">
@@ -76,57 +44,45 @@
 
     <div class="speed-ui">
         <div id="speed" class="speed-val">0</div>
-        <span class="speed-unit">km/h</span>
+        <div class="unit">km/h</div>
     </div>
 
     <div id="gear" class="gear-ui">N</div>
 
-    <div class="bottom-line">
-        <div class="stat-block"><span id="temp" class="stat-val">78.0°C</span><span class="stat-lbl">Coolant</span></div>
-        <div class="stat-block"><span id="volt" class="stat-val">12.6V</span><span class="stat-lbl">Battery</span></div>
-        <div class="stat-block"><span id="odo" class="stat-val">01250</span><span class="stat-lbl">ODO Meter</span></div>
+    <div class="bottom-bar">
+        <div style="text-align:center;">78.0°C<span class="stat-label">Coolant</span></div>
+        <div style="text-align:center;">12.6V<span class="stat-label">Battery</span></div>
+        <div style="text-align:center;">01250<span class="stat-label">ODO Meter</span></div>
     </div>
 </div>
 
 <script>
     const svg = document.getElementById('rpm-svg');
-    const totalSegments = 55;
-
-    // RPM Segments Generator (Improved Curve)
-    for (let i = 0; i < totalSegments; i++) {
-        let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        let startX = 40 + (i * 13.5);
-        let startY = 240 - (Math.pow(i, 1.55) * 0.45);
-        path.setAttribute("d", `M ${startX} ${startY} L ${startX + 9} ${startY - 18}`);
-        path.setAttribute("class", "rpm-seg");
-        path.setAttribute("stroke-width", 5 + (i * 0.35)); 
-        path.setAttribute("id", "seg-" + i);
-        svg.appendChild(path);
+    const totalSegs = 50;
+    for (let i = 0; i < totalSegs; i++) {
+        let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        let x = 50 + (i * 14.5);
+        let y = 240 - (Math.pow(i, 1.5) * 0.4); // Curve එක
+        p.setAttribute("d", `M ${x} ${y} L ${x + 10} ${y - 15}`);
+        p.setAttribute("class", "seg");
+        p.setAttribute("stroke-width", 6 + (i * 0.3)); // පස්සට යද්දී මහත වැඩි වෙනවා
+        p.setAttribute("id", "s-" + i);
+        svg.appendChild(p);
     }
 
-    function updateDash(rpm, speed, temp, volt, odo, trip, gear, stand) {
-        let activeSegs = Math.floor((rpm / 12000) * totalSegments);
-        for (let i = 0; i < totalSegments; i++) {
-            let seg = document.getElementById("seg-" + i);
-            if (i < activeSegs) {
-                if (i > 45) seg.style.stroke = "var(--danger-red)";
-                else seg.style.stroke = "var(--kawasaki-green)";
-                seg.style.filter = "drop-shadow(0 0 5px currentColor)";
+    function setRPM(val) {
+        let active = Math.floor((val / 12000) * totalSegs);
+        for (let i = 0; i < totalSegs; i++) {
+            let s = document.getElementById("s-" + i);
+            if (i < active) {
+                s.style.stroke = (i > 42) ? "#ff3131" : "#32cd32";
+                s.style.filter = "drop-shadow(0 0 5px currentColor)";
             } else {
-                seg.style.stroke = "#151515"; seg.style.filter = "none";
+                s.style.stroke = "#151515"; s.style.filter = "none";
             }
         }
-        document.getElementById('speed').innerText = speed;
-        document.getElementById('temp').innerText = temp.toFixed(1) + "°C";
-        document.getElementById('volt').innerText = volt.toFixed(1) + "V";
-        document.getElementById('odo').innerText = odo.toString().padStart(5, '0');
-        document.getElementById('trip').innerText = trip.toFixed(1);
-        document.getElementById('gear').innerText = gear;
-        document.getElementById('stand-id').style.display = stand ? "block" : "none";
     }
-
-    // Demo Initial State
-    updateDash(4000, 0, 78.0, 12.6, 1250, 5.2, "N", true);
+    setRPM(4500);
 </script>
 </body>
 </html>
