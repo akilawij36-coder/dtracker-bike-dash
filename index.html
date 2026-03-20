@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Tracker Pro Dash v15.2 (Dynamic RPM)</title>
+    <title>D-Tracker Pro Dash v15.3</title>
     <style>
         :root {
-            --kawasaki-green: #32cd32; --danger-red: #ff3131; --bg-black: #000;
+            --kawasaki-green: #32cd32; --danger-red: #ff3131; --warning-yellow: #ffcc00; --bg-black: #000;
         }
         body { background-color: var(--bg-black); color: white; font-family: 'Orbitron', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
         
@@ -14,18 +14,24 @@
             position: relative; width: 850px; height: 480px; background: #000; border-radius: 40px; border: 2px solid #111; overflow: hidden; 
         }
 
-        /* Top Icons */
-        .top-row { position: absolute; top: 20px; width: 90%; left: 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        /* Top Icons & Warnings */
+        .top-row { position: absolute; top: 15px; width: 90%; left: 5%; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .signal { font-size: 40px; color: #1a1a1a; transition: 0.2s; }
         .signal-active { color: var(--kawasaki-green); text-shadow: 0 0 20px var(--kawasaki-green); }
-        .fan-icon { font-size: 12px; color: #1a1a1a; font-weight: bold; }
+        
+        /* Side Stand & Fan Center Area */
+        .center-warnings { text-align: center; flex-grow: 1; }
+        .stand-warning { 
+            color: var(--warning-yellow); font-size: 16px; font-weight: bold; display: none; /* JS එකෙන් පේන්න හදමු */
+            text-shadow: 0 0 10px var(--warning-yellow); margin-bottom: 2px;
+        }
+        .fan-icon { font-size: 11px; color: #1a1a1a; font-weight: bold; transition: 0.3s; }
         .fan-active { color: #00f3ff; text-shadow: 0 0 15px #00f3ff; }
 
-        /* Dynamic RPM Segments */
+        /* RPM, Speed, Gear (v15.2 style) */
         .rpm-area { position: absolute; top: 60px; left: 30px; width: 750px; height: 250px; z-index: 5; }
-        .rpm-seg { fill: none; stroke: #151515; stroke-linecap: butt; transition: stroke 0.1s, filter 0.1s; }
-
-        /* Speedo & Gear */
+        .rpm-seg { fill: none; stroke: #151515; stroke-linecap: butt; }
+        
         .speed-ui { position: absolute; top: 140px; left: 35%; transform: translateX(-50%); text-align: center; z-index: 10; }
         .speed-val { font-size: 180px; font-weight: 900; line-height: 0.8; letter-spacing: -8px; }
         .speed-unit { font-size: 22px; color: #444; margin-top: 5px; display: block; }
@@ -35,7 +41,6 @@
             border: 3px solid var(--kawasaki-green); padding: 5px 30px; border-radius: 20px; text-shadow: 0 0 25px var(--kawasaki-green);
         }
 
-        /* Bottom Data */
         .bottom-line { 
             position: absolute; bottom: 30px; width: 85%; left: 7.5%; display: flex; justify-content: space-between; border-top: 1px solid #111; padding-top: 20px;
         }
@@ -52,7 +57,10 @@
 <div class="meter-container">
     <div class="top-row">
         <div id="l-sig" class="signal">⇦</div>
-        <div id="fan" class="fan-icon">FAN ON</div>
+        <div class="center-warnings">
+            <div id="stand-id" class="stand-warning">⚠ SIDE STAND</div>
+            <div id="fan-id" class="fan-icon">FAN ON</div>
+        </div>
         <div id="r-sig" class="signal">⇨</div>
     </div>
 
@@ -82,20 +90,48 @@
     const svg = document.getElementById('rpm-svg');
     const totalSegments = 50;
 
-    // RPM Segments ටික Generate කරනවා (මුල පොඩියි, අග ලොකුයි)
     for (let i = 0; i < totalSegments; i++) {
         let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         let startX = 50 + (i * 14);
-        let startY = 220 - (Math.pow(i, 1.6) * 0.4); // Curve එකක් ගන්න math එක
-        
+        let startY = 220 - (Math.pow(i, 1.6) * 0.4);
         path.setAttribute("d", `M ${startX} ${startY} L ${startX + 8} ${startY - 15}`);
         path.setAttribute("class", "rpm-seg");
-        // RPM වැඩි වෙද්දී Segment එකේ මහත (stroke-width) වැඩි කරනවා
         path.setAttribute("stroke-width", 4 + (i * 0.4)); 
         path.setAttribute("id", "seg-" + i);
         svg.appendChild(path);
     }
 
-    function updateDash(rpm, speed, temp, volt, odo, trip, gear, sigL, sigR) {
-        // RPM Update
-        let
+    function updateDash(rpm, speed, temp, volt, odo, trip, gear, sigL, sigR, standDown) {
+        // RPM Segments
+        let activeSegs = Math.floor((rpm / 12000) * totalSegments);
+        for (let i = 0; i < totalSegments; i++) {
+            let seg = document.getElementById("seg-" + i);
+            if (i < activeSegs) {
+                if (i > 40) { seg.style.stroke = "var(--danger-red)"; seg.style.filter = "drop-shadow(0 0 8px var(--danger-red))"; }
+                else { seg.style.stroke = "var(--kawasaki-green)"; seg.style.filter = "drop-shadow(0 0 5px var(--kawasaki-green))"; }
+            } else { seg.style.stroke = "#151515"; seg.style.filter = "none"; }
+        }
+
+        document.getElementById('speed').innerText = speed;
+        document.getElementById('temp').innerText = temp.toFixed(1) + "°C";
+        document.getElementById('volt').innerText = volt.toFixed(1) + "V";
+        document.getElementById('odo').innerText = odo.toString().padStart(5, '0');
+        document.getElementById('trip').innerText = trip.toFixed(1);
+        document.getElementById('gear').innerText = gear;
+        
+        // Signals & Fan
+        document.getElementById('l-sig').className = sigL ? "signal signal-active" : "signal";
+        document.getElementById('r-sig').className = sigR ? "signal signal-active" : "signal";
+        document.getElementById('fan-id').className = temp >= 75 ? "fan-icon fan-active" : "fan-icon";
+
+        // SIDE STAND WARNING [New]
+        document.getElementById('stand-id').style.display = standDown ? "block" : "none";
+    }
+
+    // Demo: Side stand active විදිහට බලන්න true දාලා තියෙන්නේ
+    setInterval(() => {
+        updateDash(4500, 0, 78.0, 12.6, 1250, 5.2, "N", false, false, true);
+    }, 100);
+</script>
+</body>
+</html>
